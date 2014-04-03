@@ -194,7 +194,8 @@
         __block UIViewController* popoverContent = [[UIViewController alloc] init];
         
         __block UIView *popoverView = [[UIView alloc] init];
-        popoverView.backgroundColor = [UIColor blackColor];
+        //popoverView.backgroundColor = [UIColor blackColor];
+        popoverView.backgroundColor = [UIColor whiteColor];
         
         UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         popoverController.delegate=self;
