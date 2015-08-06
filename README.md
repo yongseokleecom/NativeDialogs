@@ -76,7 +76,7 @@ In iOS7 there have been changes to the api that blocks adding subiews to the ale
 				trace(event);
 				trace("Date set to:"+String(n.date));
 			});
-			d.buttons = Vector.<String>(["Cancle","OK"]);
+			d.buttons = Vector.<String>(["OK","Cancel"]);
 			d.displayMode = NativeDatePickerDialog.DISPLAY_MODE_DATE_AND_TIME;
 			d.title = "DatePicker";
 			d.message = "Select date:";
@@ -98,7 +98,7 @@ In iOS7 there have been changes to the api that blocks adding subiews to the ale
 *Usage:*
 
 	private function showAlert(){
-		NativeAlertDialog.showAlert( "some message" , "title" ,  Vector.<String>(["OK","Cancle"]) , 
+		NativeAlertDialog.showAlert( "some message" , "title" ,  Vector.<String>(["OK","Cancel"]) , 
 			function someAnswerFunction(event:NativeDialogEvent):void{
 				//event.preventDefault(); 
 				var buttonPressed:String = event.index;// the index of the pressed button
@@ -138,7 +138,7 @@ Available themes for IOS:
 * IOS\_SVHUD\_BLACK\_BACKGROUND\_THEME - uses [SVProgressHUD](http://github.com/samvermette/SVProgressHUD)
 * IOS\_SVHUD\_NON\_BACKGROUND\_THEME - uses [SVProgressHUD](http://github.com/samvermette/SVProgressHUD)
 * IOS\_SVHUD\_GRADIENT\_BACKGROUND\_THEME - uses [SVProgressHUD](http://github.com/samvermette/SVProgressHUD)
-* DEFAULT\_THEME (cancleble is ignored)
+* DEFAULT\_THEME (Cancelble is ignored)
 
 
 *Usage:*
@@ -221,7 +221,7 @@ IOS uses: [SBTableAlert](https://github.com/blommegard/SBTableAlert)
 				m.shake();
 			});
 				
-			m.buttons = Vector.<String> (["OK","Cancle"]);
+			m.buttons = Vector.<String> (["OK","Cancel"]);
 			m.title = "Title";
 			m.message = "Message";
 			m.dataProvider = Vector.<Object>(["one","two","three"]);
@@ -239,7 +239,7 @@ IOS uses: [SBTableAlert](https://github.com/blommegard/SBTableAlert)
 			m.addEventListener(NativeDialogEvent.CLOSED,readSelected);
 			m.addEventListener(NativeDialogListEvent.LIST_CHANGE,trace);
 				
-			m.buttons = Vector.<String> (["OK","Cancle"]);
+			m.buttons = Vector.<String> (["OK","Cancel"]);
 			m.title = "Title";
 			m.message = "Message";
 			m.dataProvider = Vector.<Object>(["one","two","three"]);
@@ -349,7 +349,6 @@ For IOS uses : [WToast](https://github.com/Narmo/WToast)
 ***
 If You like what I make please donate:
 [![Foo](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4QBWVDKEVRL46)
-
 ***
 
 Before creating an Issue. Please:
