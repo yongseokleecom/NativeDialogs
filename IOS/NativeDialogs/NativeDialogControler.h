@@ -67,12 +67,12 @@
 
 -(void)showDatePickerWithTitle:(NSString *)title
                     andMessage:(NSString *)message
-                       andDate:(double)date
+                       andDate:(double *)date
                       andStyle:(const uint8_t*)style
                     andButtons:(FREObject*)buttons
                   andHasMinMax:(bool)hasMinMax
-                        andMin:(double)min
-                        andMax:(double)max;
+                        andMin:(double *)min
+                        andMax:(double *)max;
 
 -(void)updateDateWithTimestamp:(double)timeStamp;
 -(void)setCancelable:(uint32_t)cancelable;

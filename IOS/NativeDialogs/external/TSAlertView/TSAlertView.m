@@ -16,6 +16,7 @@
 @implementation  TSAlertOverlayWindow
 @synthesize oldKeyWindow;
 
+
 - (void) makeKeyAndVisible
 {
 	self.oldKeyWindow = [[UIApplication sharedApplication] keyWindow];
@@ -35,22 +36,38 @@
 	
 	CGFloat width			= self.frame.size.width;
 	CGFloat height			= self.frame.size.height;
-	CGFloat locations[3]	= { 0.0, 0.5, 1.0 	};
+    CGFloat locations[3]	= { 0.0, 0.5, 1.0 	};
 	CGFloat components[12]	= {	1, 1, 1, 0.5,
 		0, 0, 0, 0.5,
 		0, 0, 0, 0.7	};
+    
+    
+    BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+    if (iOS_7andUP) {
+        CGRect rectangle = CGRectMake(0, 0, width, height);
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 0.5);
+        CGContextSetRGBStrokeColor(context, 0.0, 0.0, 0.0, 0.5);
+        CGContextFillRect(context, rectangle);
+    }else{
+        CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+        CGGradientRef backgroundGradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 3);
+        CGColorSpaceRelease(colorspace);
+     
+        CGContextDrawRadialGradient(UIGraphicsGetCurrentContext(),
+                                    backgroundGradient,
+                                    CGPointMake(width/2, height/2), 0,
+                                    CGPointMake(width/2, height/2), width,
+                                    0);
+     
+        CGGradientRelease(backgroundGradient);
+    }
+    
+    
+   
 	
-	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-	CGGradientRef backgroundGradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 3);
-	CGColorSpaceRelease(colorspace);
-	
-	CGContextDrawRadialGradient(UIGraphicsGetCurrentContext(), 
-								backgroundGradient, 
-								CGPointMake(width/2, height/2), 0,
-								CGPointMake(width/2, height/2), width,
-								0);
-	
-	CGGradientRelease(backgroundGradient);
+    
+    
 }
 
 - (void) dealloc
@@ -79,6 +96,7 @@
 - (CGSize) buttonsAreaSize_SideBySide;
 - (CGSize) recalcSizeAndLayout: (BOOL) layout;
 @end
+
 
 @interface TSAlertViewController : UIViewController
 {
@@ -112,7 +130,6 @@
 
 @end
 
-
 @implementation TSAlertView
 
 @synthesize delegate;
@@ -130,6 +147,8 @@ const CGFloat kTSAlertView_TopMargin	= 16.0;
 const CGFloat kTSAlertView_BottomMargin = 15.0;
 const CGFloat kTSAlertView_RowMargin	= 5.0;
 const CGFloat kTSAlertView_ColumnMargin = 10.0;
+
+
 
 - (id) init 
 {
@@ -341,6 +360,11 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
     [ self addSubview:customSubview ];
 }
 
+#ifdef __IPHONE_6_0
+# define ALIGN_CENTER NSTextAlignmentCenter
+#else
+# define ALIGN_CENTER UITextAlignmentCenter
+#endif
 
 - (UILabel*) titleLabel
 {
@@ -349,10 +373,16 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 		_titleLabel = [[UILabel alloc] init];
 		_titleLabel.font = [UIFont boldSystemFontOfSize: 18];
 		_titleLabel.backgroundColor = [UIColor clearColor];
-		_titleLabel.textColor = [UIColor whiteColor];
-		_titleLabel.textAlignment = UITextAlignmentCenter;
-		_titleLabel.lineBreakMode = UILineBreakModeWordWrap;
+		_titleLabel.textAlignment = ALIGN_CENTER;
+        _titleLabel.lineBreakMode = NSLineBreakByCharWrapping;//UILineBreakModeWordWrap;
 		_titleLabel.numberOfLines = 0;
+        
+        BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+        if (iOS_7andUP) {
+            _titleLabel.textColor = [UIColor blackColor];
+        }else{
+            _titleLabel.textColor = [UIColor whiteColor];
+        }
         
         [self addSubview: _titleLabel];
 	}
@@ -367,10 +397,16 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 		_messageLabel = [[UILabel alloc] init];
 		_messageLabel.font = [UIFont systemFontOfSize: 16];
 		_messageLabel.backgroundColor = [UIColor clearColor];
-		_messageLabel.textColor = [UIColor whiteColor];
-		_messageLabel.textAlignment = UITextAlignmentCenter;
-		_messageLabel.lineBreakMode = UILineBreakModeWordWrap;
+		_messageLabel.textAlignment = ALIGN_CENTER;
+		_messageLabel.lineBreakMode = NSLineBreakByCharWrapping;
 		_messageLabel.numberOfLines = 0;
+        
+        BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+        if (iOS_7andUP) {
+            _messageLabel.textColor = [UIColor blackColor];
+        }else{
+            _messageLabel.textColor = [UIColor whiteColor];
+        }
         
         [self addSubview: _messageLabel];
 	}
@@ -480,7 +516,13 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 	UIImage* buttonBgPressed = [UIImage imageNamed: @"TSAlertViewButtonBackground_Highlighted.png"];
 	buttonBgPressed = [buttonBgPressed stretchableImageWithLeftCapWidth: buttonBgPressed.size.width / 2.0 topCapHeight: buttonBgPressed.size.height / 2.0];
 	[b setBackgroundImage: buttonBgPressed forState: UIControlStateHighlighted];
+    
+    BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+    if (iOS_7andUP) {
+    [b setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
+    }
 }
+//iOS7 BLUE [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0]
 
 - (BOOL) isVisible
 {
@@ -507,6 +549,11 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
     [self addSubview: b];
     
 	[self setNeedsLayout];
+    
+    BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+    if (iOS_7andUP) {
+        [b setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
+    }
 	
 	return self.buttons.count-1;
 }

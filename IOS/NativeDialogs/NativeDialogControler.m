@@ -55,7 +55,6 @@
 
 
 
-
 @implementation NativeDialogControler
 
 
@@ -91,13 +90,20 @@
                   message: (NSString*)message
                 andButtons:(FREObject *)buttons{
     
+    
+    //(void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex
+    NSLog(@"Show Alert");
+    
+    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
+    if (iOS_7andDown) {
     [self dismissWithButtonIndex:0];
+    }
     
     NSString* closeLabel=nil;
     
     uint32_t buttons_len;
     FREGetArrayLength(buttons, &buttons_len);
-    
+
     if(buttons_len>0){
         FREObject button0;
         FREGetArrayElementAt(buttons, 0, &button0);
@@ -110,13 +116,15 @@
     }else{
         closeLabel = NSLocalizedString(@"OK", nil);
     }
+
     alert = [[UIAlertView alloc] initWithTitle:title
                                            message:message
                                           delegate:self
                                  cancelButtonTitle:closeLabel
                              otherButtonTitles:nil];
-    
+
     if(buttons_len>1){
+
         FREObject button1;
         FREGetArrayElementAt(buttons, 1, &button1);
         
@@ -129,14 +137,16 @@
             [alert addButtonWithTitle:otherButton];
             
         }
-        
+
     }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [alert show];
     });
     
-    
+
     FREDispatchStatusEventAsync(freContext, nativeDialog_opened, (uint8_t*)"-1");
+  
 
 }
 
@@ -146,7 +156,10 @@
               otherLabels: (NSString*)otherLabels
 {
 
-    [self dismissWithButtonIndex:0];
+    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
+    if (iOS_7andDown) {
+        [self dismissWithButtonIndex:0];
+    }
 
     //Create our alert.
     alert = [[UIAlertView alloc] initWithTitle:title
@@ -182,20 +195,29 @@
 
 
 #pragma mark - Toolbar and Pickers Utilities
-
+UIViewController* blackBG;
+UIToolbar* toolbar;
+UIView* viewToPresentCurrent;
 
 -(void)presentView:(UIView*)viewToPresent withToolBarItems:(FREObject *)toolbarItems andTitle:(NSString*)title{
 
-    [self dismissWithButtonIndex:0];
+    viewToPresentCurrent = viewToPresent;
+    BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+    if (iOS_7andUP) {
+        viewToPresent.backgroundColor = [UIColor whiteColor];
+    }
+    
+    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
+    if (iOS_7andDown) {
+        [self dismissWithButtonIndex:0];
+    }
     NSArray* buttons = [NativeDialogControler arrayOfStringsFormFreArray:toolbarItems];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
     {
         __block UIViewController* popoverContent = [[UIViewController alloc] init];
-        
         __block UIView *popoverView = [[UIView alloc] init];
         //popoverView.backgroundColor = [UIColor blackColor];
-        popoverView.backgroundColor = [UIColor whiteColor];
         
         UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         popoverController.delegate=self;
@@ -203,7 +225,7 @@
         UIWindow* wind= [[UIApplication sharedApplication] keyWindow];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+   // ****
             UIToolbar* toolbar = [self initToolbar:buttons];
             
             [popoverView addSubview:viewToPresent];
@@ -235,39 +257,85 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
         
     }else{
-        UIActionSheet *aac = [[UIActionSheet alloc] initWithTitle:title
-                                                         delegate:self
-                                                cancelButtonTitle:nil
-                                           destructiveButtonTitle:nil
-                                                otherButtonTitles:nil];
-       
         
-        UIWindow* wind= [[UIApplication sharedApplication] keyWindow];
-        if(!wind){
-            NSLog(@"Window is nil");
-            FREDispatchStatusEventAsync(freContext, error, (const uint8_t*)"Window is nil");
-            return;
+        //NSLog([[UIDevice currentDevice] systemVersion]);
+        BOOL isNotOS_8 = [[[UIDevice currentDevice] systemVersion] floatValue]<8.0;
+        if (isNotOS_8) {
+            
+            NSLog(@"is not iOS8");
+            UIActionSheet *aac = [[UIActionSheet alloc] initWithTitle:title
+                                                             delegate:self
+                                                    cancelButtonTitle:nil
+                                               destructiveButtonTitle:nil
+                                                    otherButtonTitles:nil];
+            
+            
+            UIWindow* wind= [[UIApplication sharedApplication] keyWindow];
+            
+            if(!wind){
+                NSLog(@"Window is nil");
+                FREDispatchStatusEventAsync(freContext, error, (const uint8_t*)"Window is nil");
+                return;
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIToolbar* toolbar = [self initToolbar:buttons];
+                [aac addSubview:viewToPresent];
+                [aac addSubview:toolbar];
+                
+                [aac showInView:wind.rootViewController.view];
+                
+                if (UIDeviceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
+                    [aac setBounds:CGRectMake(0,0,[UIScreen mainScreen].bounds.size.height, 370)];
+                } else {
+                    [aac setBounds:CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width, 464)];
+                }
+                [viewToPresent sizeToFit];
+                
+                [toolbar sizeToFit];
+                [toolbar release];
+                
+                
+            });
+            actionSheet = aac;
+
+        }else{
+             NSLog(@"is iOS8 or UP");
+            UIView *wind = [[[[UIApplication sharedApplication] keyWindow] rootViewController] view];
+
+            if(!wind){
+                NSLog(@"Window is nil");
+                FREDispatchStatusEventAsync(freContext, error, (const uint8_t*)"Window is nil");
+                return;
+            }
+            
+            //UIViewController* blackBG = [[UIViewController alloc] init];
+            blackBG = [[UIViewController alloc] init];
+            [blackBG.view setBackgroundColor:[UIColor blackColor]];
+            [blackBG.view setAlpha:0.5];
+            [wind addSubview:blackBG.view];
+            
+            CGRect viewToPresentRect = viewToPresent.frame;
+            viewToPresentRect.origin.y = wind.bounds.size.height - viewToPresentRect.size.height;
+            viewToPresent.frame = viewToPresentRect;
+            [wind addSubview:viewToPresent];
+            
+            //UIToolbar* toolbar = [self initToolbar:buttons];
+            toolbar = [self initToolbar:buttons];
+            CGRect toolbarRect = toolbar.frame;
+            toolbarRect.origin.y = viewToPresentRect.origin.y - toolbarRect.size.height;
+            toolbar.frame = toolbarRect;
+            [wind addSubview:toolbar];
+            
+            /*[wind.window.rootViewController presentViewController:pickerHolder animated:YES completion:^{
+                [wind setBackgroundColor:[UIColor blackColor]];
+                [wind setAlpha:0.5];
+            }];*/
+            
+            
+            
         }
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            UIToolbar* toolbar = [self initToolbar:buttons];
-            
-            [aac addSubview:viewToPresent];
-            [aac addSubview:toolbar];
-            
-            [aac showInView:wind.rootViewController.view];
-        
-            if (UIDeviceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
-                [aac setBounds:CGRectMake(0,0,[UIScreen mainScreen].bounds.size.height, 370)];
-            } else {
-                [aac setBounds:CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width, 464)];
-            }
-            [viewToPresent sizeToFit];
-            
-            [toolbar sizeToFit];
-            [toolbar release];
-        });
-        actionSheet = aac;
         
     }
     FREDispatchStatusEventAsync(freContext, nativeDialog_opened, (uint8_t*)"-1");
@@ -275,6 +343,14 @@
     
     
 }
+
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 70000
+# define BUTTON_ITEM_STYLE UIBarButtonItemStylePlain
+#else
+# define BUTTON_ITEM_STYLE UIBarButtonItemStyleBordered
+#endif
+
 
 - (UIToolbar *)initToolbar:(NSArray*)buttons
 {
@@ -285,11 +361,14 @@
 
     uint32_t buttons_len = 0;
     if (buttons && buttons.count>0) {
-        buttons_len = buttons.count;
+        
+        buttons_len = (uint32_t) buttons.count;
         UIBarButtonItem *barButton;
         
         for (int i =1; i<buttons_len; i++) {
-            barButton = [[UIBarButtonItem alloc] initWithTitle:[buttons objectAtIndex:i] style:UIBarButtonItemStyleBordered target:self action:@selector(actionSheetButtonClicked:)];
+            
+            barButton = [[UIBarButtonItem alloc] initWithTitle:[buttons objectAtIndex:i] style:BUTTON_ITEM_STYLE target:self action:@selector(actionSheetButtonClicked:)];
+            
             [barButton setTag:i];
             [barItems addObject:barButton];
             [barButton release];
@@ -301,7 +380,7 @@
         [flexSpace release];
         flexSpace = nil;
         
-        barButton = [[UIBarButtonItem alloc] initWithTitle:[buttons objectAtIndex:0] style:UIBarButtonItemStyleBordered target:self action:@selector(actionSheetButtonClicked:)];
+        barButton = [[UIBarButtonItem alloc] initWithTitle:[buttons objectAtIndex:0] style:BUTTON_ITEM_STYLE target:self action:@selector(actionSheetButtonClicked:)];
         [barButton setTag:0];
         [barItems addObject:barButton];
         [barButton release];
@@ -332,11 +411,11 @@
     NSInteger index = [sender tag];
     if(cancelable && index == 1)
     {
-        FREDispatchStatusEventAsync(freContext, nativeDialog_canceled, (const uint8_t *)[[NSString stringWithFormat:@"%d",index] UTF8String]);
+        FREDispatchStatusEventAsync(freContext, nativeDialog_canceled, (const uint8_t *)[[NSString stringWithFormat:@"%ld",(long)index] UTF8String]);
     }
     else
     {
-        FREDispatchStatusEventAsync(freContext, nativeDialog_closed, (const uint8_t *)[[NSString stringWithFormat:@"%d",index] UTF8String]);
+        FREDispatchStatusEventAsync(freContext, nativeDialog_closed, (const uint8_t *)[[NSString stringWithFormat:@"%ld",(long)index] UTF8String]);
     }
     
     if(popover){
@@ -345,9 +424,23 @@
         
         [popover dismissPopoverAnimated:YES];
     }else{
-        [actionSheet dismissWithClickedButtonIndex:[sender tag] animated:YES];
-        [actionSheet autorelease];
-        actionSheet = nil;
+        BOOL isNotOS_8 = [[[UIDevice currentDevice] systemVersion] floatValue]<8.0;
+        if (isNotOS_8) {
+            [actionSheet dismissWithClickedButtonIndex:[sender tag] animated:YES];
+            [actionSheet autorelease];
+            actionSheet = nil;
+        }else{
+            [blackBG.view removeFromSuperview ];
+            [toolbar removeFromSuperview];
+            [viewToPresentCurrent removeFromSuperview];
+            [blackBG autorelease];
+            [toolbar autorelease];
+            [viewToPresentCurrent autorelease];
+            blackBG =nil;
+            toolbar =nil;
+            viewToPresentCurrent=nil;
+        }
+            
     }
 }
 #pragma mark pickers rotation 
@@ -368,7 +461,7 @@
 
 
 #pragma mark - Picker
-
+UIPickerView *pickerList;
 -(void)showPickerWithOptions:(FREObject*)options
                   andIndexes:(FREObject*)indexes
                    withTitle:(NSString*)title
@@ -379,6 +472,25 @@
     NSLog(@"Show picker with options");
 #endif
     @try {
+        NSLog(@"pickerLIST****");
+        
+        /*
+        if(pickerList!=nil){
+            NSLog(@"PICKER NO ES NULL");
+            if(pickerList.hidden){
+                NSLog(@"PICKER ES HIDDEN");
+            }else{
+                NSLog(@"PICKER NO ES HIDDEN");
+                pickerList.hidden = YES;
+                return;
+            }
+         
+            //
+        }else{
+            NSLog(@"PICKER ES NULL");
+        }
+        */
+
         uint32_t options_len;
         if (FREGetArrayLength(options, &options_len) == FRE_OK)
         {
@@ -397,6 +509,7 @@
             }else{
 
                 picker = [[UIPickerView alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
+
                 picker.showsSelectionIndicator = YES;
                 delegate = [[NativeListDelegate alloc] initWithMultipleOptions:options andWidths:widths target:self action:@selector(selectionChanged:withRow:andComponent:)];
                 picker.delegate = delegate;
@@ -423,7 +536,7 @@
                 [self presentView:picker withToolBarItems:buttons andTitle:title];
                 
             }
-
+            
         }
     }
     @catch (NSException *exception) {
@@ -437,7 +550,7 @@
 
 -(void)setSelectedRow:(NSInteger)index andSection:(NSInteger)section{
     dispatch_async(dispatch_get_main_queue(), ^{
-        [picker selectRow:index inComponent:section animated:YES];
+        [pickerList selectRow:index inComponent:section animated:YES];
     });
 }
 
@@ -449,15 +562,17 @@
                         buttons: (FREObject*)buttons{
     @try {
         
-        picker = [[UIPickerView alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
+        //picker = [[UIPickerView alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
+        picker = [[UIPickerView alloc] init];
+        picker.frame = CGRectMake(5,70,150,300);
         picker.showsSelectionIndicator = YES;
         delegate = [[NativeListDelegate alloc] initWithOptions:options target:self action:@selector(selectionChanged:withRow:)];
         picker.delegate = delegate;
         
         if(checked>-1){
-            [picker selectRow:checked inComponent:0 animated:NO];
+            [pickerList selectRow:checked inComponent:0 animated:NO];
         }
-        [self presentView:picker withToolBarItems:buttons andTitle:title];
+        [self presentView:pickerList withToolBarItems:buttons andTitle:title];
         
     }
     @catch (NSException *exception) {
@@ -465,23 +580,40 @@
     }
 }
 
+
+
 #pragma mark - Date Picker
+
 -(void)showDatePickerWithTitle:(NSString *)title
                     andMessage:(NSString *)message
-                       andDate:(double)date
+                       andDate:(double *)date
                       andStyle:(const uint8_t*)style
                     andButtons:(FREObject*)buttons
                   andHasMinMax:(bool)hasMinMax
-                        andMin:(double)minDate
-                        andMax:(double)maxDate {
+                        andMin:(double *)minDate
+                        andMax:(double *)maxDate {
     @try {
+        
+        /*
+        if(datePicker!=nil && datePicker.hidden == NO){
+            NSLog(@"[AirDatePicker] HIDDING");
+            datePicker.hidden = YES;
+            return;
+        }
+         */
 
-       
-        [self dismissWithButtonIndex:0];
+       //UIView *rootView = [[[[UIApplication sharedApplication] keyWindow] rootViewController] view];
+//--------------------------------------------------------------------------------------------------------------------
+        //[self dismissWithButtonIndex:0];
         
         UIDatePicker *datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
-        [datePicker setDate:[NSDate dateWithTimeIntervalSince1970:date]];
+        [datePicker setDate:[NSDate dateWithTimeIntervalSince1970:*date]];
+        datePicker.hidden = NO;
         
+        BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+        if (iOS_7andUP) {
+            datePicker.backgroundColor = [UIColor whiteColor];
+        }
         
         if(strcmp((const char *)style, (const char *)"time")==0)
         {
@@ -496,13 +628,14 @@
         
         if(hasMinMax && datePicker.datePickerMode != UIDatePickerModeTime)
         {
-            datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:minDate];
-            datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:maxDate];
+            datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:*minDate];
+            datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:*maxDate];
         }
         
         [datePicker addTarget:self action:@selector(dateChanged:) forControlEvents:UIControlEventValueChanged];
         
         [self presentView:datePicker withToolBarItems:buttons andTitle:title];
+    
         
     }
     @catch (NSException *exception) {
@@ -617,6 +750,10 @@
             [alert addSubview:progressView];
         }else{
             [tsalertView setCustomSubview:progressView];
+            BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+            if (iOS_7andUP) {
+                tsalertView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.8];
+            }
         }
         [progressView setProgressViewStyle: UIProgressViewStyleBar];
         progressView.progress=[progress floatValue];
@@ -780,7 +917,7 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
                 textInputs: (FREObject*)textInputs
                    buttons: (FREObject*)buttons
 {
-    [self dismissWithButtonIndex:0];
+    //[self dismissWithButtonIndex:0];
     
     NSString* closeLabel=nil;
     
@@ -897,12 +1034,12 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
 
 -(void)selectionChanged:(id)sender
                 withRow:(NSInteger)row{
-    FREDispatchStatusEventAsync(freContext, nativeListDialog_change, (const uint8_t *)[[NSString stringWithFormat:@"%D",row] UTF8String]);
+    FREDispatchStatusEventAsync(freContext, nativeListDialog_change, (const uint8_t *)[[NSString stringWithFormat:@"%lD",(long)row] UTF8String]);
 }
 -(void)selectionChanged:(id)sender
                 withRow:(NSInteger)row
            andComponent:(NSInteger)component{
-    FREDispatchStatusEventAsync(freContext, nativeListDialog_change, (const uint8_t *)[[NSString stringWithFormat:@"%D_%D",component,row] UTF8String]);
+    FREDispatchStatusEventAsync(freContext, nativeListDialog_change, (const uint8_t *)[[NSString stringWithFormat:@"%lD_%lD",(long)component,(long)row] UTF8String]);
 }
 
 -(void)showSelectDialogWithTitle: (NSString*)title
@@ -913,6 +1050,8 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
                          buttons: (FREObject*)buttons{
     
     FREObjectType type;
+    
+    
     if(displayType == 6)
     {
         uint32_t checkedEntry =-1;
@@ -959,6 +1098,12 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
         sbAlert = [[SBTableAlert alloc] initWithTitle:title cancelButtonTitle:closeLabel messageFormat: message];
         [sbAlert setDataSource:self];
         [sbAlert setDelegate:self];
+        
+        BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
+        if (iOS_7andUP) {
+            //[sbAlert.view setBackgroundColor:[UIColor whiteColor]];
+            sbAlert.view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.8];
+        }
         
         if(otherLabel && ![otherLabel isEqualToString:@""])
         {
@@ -1096,14 +1241,14 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
 		UITableViewCell *cell = [tableAlert.tableView cellForRowAtIndexPath:indexPath];
 		if (cell.accessoryType == UITableViewCellAccessoryNone){
 			[cell setAccessoryType:UITableViewCellAccessoryCheckmark];
-            returnString = [NSString stringWithFormat:@"%d_true",[indexPath row]];
+            returnString = [NSString stringWithFormat:@"%ld_true",(long)[indexPath row]];
         }else{
 			[cell setAccessoryType:UITableViewCellAccessoryNone];
-            returnString = [NSString stringWithFormat:@"%d_false",[indexPath row]];
+            returnString = [NSString stringWithFormat:@"%ld_false",(long)[indexPath row]];
 		}
 		[tableAlert.tableView deselectRowAtIndexPath:indexPath animated:YES];
 	}else
-        returnString = [NSString stringWithFormat:@"%d", [indexPath row]];
+        returnString = [NSString stringWithFormat:@"%ld", (long)[indexPath row]];
     
     FREDispatchStatusEventAsync(freContext, nativeListDialog_change, (uint8_t*)[returnString UTF8String]);
      
@@ -1114,7 +1259,7 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
 
 - (void)tableAlert:(SBTableAlert *)tableAlert didDismissWithButtonIndex:(NSInteger)buttonIndex{
 
-    NSString *buttonID = [NSString stringWithFormat:@"%d", buttonIndex];
+    NSString *buttonID = [NSString stringWithFormat:@"%ld", (long)buttonIndex];
     if(cancelable && buttonIndex == 1)
     {
         FREDispatchStatusEventAsync(freContext, nativeDialog_canceled, (uint8_t*)[buttonID UTF8String]);
@@ -1285,6 +1430,7 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
     }else{
         BOOL isIOS_5OrLater = [[[UIDevice currentDevice] systemVersion] floatValue]>=5.0;
         if(isIOS_5OrLater){
+            NSLog(@"isIOS_5OrLater");
             if([alertView alertViewStyle]!=UIAlertViewStyleDefault && [alertView alertViewStyle]!=AlertTextViewStyleDefault){
                 [[alertView textFieldAtIndex:0] resignFirstResponder];
                 if([alertView alertViewStyle]==UIAlertViewStyleLoginAndPasswordInput || [alertView alertViewStyle]==AlertTextViewStyleLoginAndPasswordInput){
@@ -1294,7 +1440,8 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
         }
     }
     //Create our params to pass to the event dispatcher.
-    NSString *buttonID = [NSString stringWithFormat:@"%d", buttonIndex];
+    NSString *buttonID = [NSString stringWithFormat:@"%ld", (long)buttonIndex];
+    
     FREDispatchStatusEventAsync(freContext, nativeDialog_closed, (uint8_t*)[buttonID UTF8String]);
     
     [progressView release];
@@ -1361,4 +1508,7 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
     }
     return nil;
 }
+
+
+
 @end

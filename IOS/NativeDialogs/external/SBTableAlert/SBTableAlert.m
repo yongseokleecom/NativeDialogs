@@ -112,7 +112,8 @@
 - (id)initWithTitle:(NSString *)title {
 	if ((self = [super initWithFrame:CGRectZero])) {
 		[self setTitle:title];
-		[self setBackgroundColor:[UIColor colorWithRed:0.165 green:0.224 blue:0.376 alpha:0.85]];
+		//[self setBackgroundColor:[UIColor colorWithRed:0.165 green:0.224 blue:0.376 alpha:0.85]];
+        [self setBackgroundColor:[UIColor blueColor]];
 	}
 	
 	return self;
@@ -127,12 +128,12 @@
 	[super drawRect:rect];
 	
 	CGContextRef context = UIGraphicsGetCurrentContext();
-	
-	[[UIColor colorWithWhite:0 alpha:0.8] set];
-	[_title drawAtPoint:CGPointMake(10, 4) withFont:[UIFont boldSystemFontOfSize:12]];	
-	[[UIColor whiteColor] set];
-	[_title drawAtPoint:CGPointMake(10, 5) withFont:[UIFont boldSystemFontOfSize:12]];
-	
+
+    [[UIColor blackColor] set];
+    [_title drawAtPoint:CGPointMake(10, 4) withAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont boldSystemFontOfSize:12], NSFontAttributeName, [NSNumber numberWithFloat:12.0], NSBaselineOffsetAttributeName, nil]];
+    [[UIColor blackColor] set];
+    [_title drawAtPoint:CGPointMake(10, 5) withAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont boldSystemFontOfSize:12], NSFontAttributeName, [NSNumber numberWithFloat:12.0], NSBaselineOffsetAttributeName, nil]];
+    
 	CGContextSetLineWidth(context, 1.5);
 	
 	[[UIColor colorWithWhite:1 alpha:0.35] set];

@@ -138,7 +138,6 @@ FREObject showTextInputDialog(FREContext ctx, void* functionData, uint32_t argc,
     
     //Create our Strings for our Alert.
     
-    
     NSString *titleString = nil;
     NSString *messageString =nil;
     
@@ -149,7 +148,6 @@ FREObject showTextInputDialog(FREContext ctx, void* functionData, uint32_t argc,
         messageString = [NSString stringWithUTF8String:(char*)message];
     }
     [nativeDialogController showTextInputDialog:titleString message:messageString textInputs:argv[2] buttons:argv[3]];
-    
     
     return nil;
 }
@@ -423,15 +421,46 @@ FREObject showDatePicker(FREContext ctx, void* functionData, uint32_t argc, FREO
             messageString =[NSString stringWithUTF8String:(char*)message];
     }
     
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"dd-MMM-yy";
+    
+    
+    
     double date;
     FREGetObjectAsDouble(argv[2], &date);
     
-    FREGetObjectAsUTF8(argv[4], &stringLength, &style);
+    
+    /*
+    uint32_t length;
+    const uint8_t* tempValue;
+    FREGetObjectAsUTF8(argv[2], &length, &tempValue);
+    NSString *dateFromAs = [NSString stringWithUTF8String:(char*) tempValue];
+    NSLog(@"dateFromAs:, %@",dateFromAs);
+     */
+    
+    
+    
+    /*
+    NSString *dateStringCurrent = dateFromAs;//@"05-Ago-15";
+    NSDate *date = [dateFormatter dateFromString:dateStringCurrent];
+     
+    
+
+    
+    NSString *dateStringMin = @"03-Sep-01";
+    NSDate *min = [dateFormatter dateFromString:dateStringMin];
+    
+    NSString *dateStringMax = @"03-Sep-20";
+    NSDate *max = [dateFormatter dateFromString:dateStringMax];
+    */
     
     bool hasMinMax = FALSE;
     
-    double min = 0.0;
-    double max = 0.0;
+    double min=0.0;
+    double max=0.0;
+    
+    FREGetObjectAsUTF8(argv[4], &stringLength, &style);
+
     
     if(argc >= 10)
     {
@@ -447,7 +476,10 @@ FREObject showDatePicker(FREContext ctx, void* functionData, uint32_t argc, FREO
         NSLog(@"Not enough arguments for min/max");
     }
     
-    [nativeDialogController showDatePickerWithTitle:titleString andMessage:messageString andDate:date andStyle:style andButtons:argv[3] andHasMinMax:hasMinMax andMin:min andMax:max];
+    
+    
+ 
+    [nativeDialogController showDatePickerWithTitle:titleString andMessage:messageString andDate:&date andStyle:style andButtons:argv[3] andHasMinMax:hasMinMax andMin:&min andMax:&max];
     uint32_t cancelable;
     FREGetObjectAsBool(argv[6], &cancelable);
     [nativeDialogController setCancelable:cancelable];

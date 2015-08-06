@@ -210,6 +210,20 @@ static SVProgressHUD *sharedView = nil;
     
     if(string) {
         CGSize stringSize = [string sizeWithFont:self.stringLabel.font constrainedToSize:CGSizeMake(200, 300)];
+      
+        /*
+        NSDictionary *attributesDictionary = [NSDictionary dictionaryWithObjectsAndKeys:
+                                              self.stringLabel.font, NSFontAttributeName,
+                                              nil];
+        
+        CGRect frame = [text boundingRectWithSize:size
+                                          options:(NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading)
+                                       attributes:attributesDictionary
+                                          context:nil];
+        
+        CGSize stringSize = [string boundingRectWithSize:<#(CGSize)#> options:<#(NSStringDrawingOptions)#> attributes:<#(NSDictionary *)#> context:<#(NSStringDrawingContext *)#>
+        */
+        
         stringWidth = stringSize.width;
         stringHeight = stringSize.height;
         hudHeight = 80+stringHeight;
