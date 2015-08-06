@@ -348,7 +348,8 @@ For IOS uses : [WToast](https://github.com/Narmo/WToast)
 
 ***
 If You like what I make please donate:
-[![Foo](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CMYHNG32SVXZ4)
+[![Foo](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4QBWVDKEVRL46)
+
 ***
 
 Before creating an Issue. Please:
