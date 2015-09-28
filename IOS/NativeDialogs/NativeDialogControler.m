@@ -94,10 +94,10 @@
     //(void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex
     NSLog(@"Show Alert");
     
-    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
-    if (iOS_7andDown) {
+    //BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
+    //if (iOS_7andDown) {
     [self dismissWithButtonIndex:0];
-    }
+    //}
     
     NSString* closeLabel=nil;
     
@@ -156,10 +156,9 @@
               otherLabels: (NSString*)otherLabels
 {
 
-    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
-    if (iOS_7andDown) {
-        [self dismissWithButtonIndex:0];
-    }
+
+    [self dismissWithButtonIndex:0];
+    
 
     //Create our alert.
     alert = [[UIAlertView alloc] initWithTitle:title
@@ -195,7 +194,8 @@
 
 
 #pragma mark - Toolbar and Pickers Utilities
-UIViewController* blackBG;
+//UIViewController* blackBG;
+UIView* blackBG;
 UIToolbar* toolbar;
 UIView* viewToPresentCurrent;
 
@@ -204,13 +204,15 @@ UIView* viewToPresentCurrent;
     viewToPresentCurrent = viewToPresent;
     BOOL iOS_7andUP = [[[UIDevice currentDevice] systemVersion] floatValue]>=7.0;
     if (iOS_7andUP) {
-        viewToPresent.backgroundColor = [UIColor whiteColor];
+        viewToPresent.backgroundColor = [UIColor colorWithWhite:1 alpha:0.8];
     }
     
     BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<=8.0;
     if (iOS_7andDown) {
         [self dismissWithButtonIndex:0];
     }
+
+
     NSArray* buttons = [NativeDialogControler arrayOfStringsFormFreArray:toolbarItems];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
@@ -310,10 +312,11 @@ UIView* viewToPresentCurrent;
             }
             
             //UIViewController* blackBG = [[UIViewController alloc] init];
-            blackBG = [[UIViewController alloc] init];
-            [blackBG.view setBackgroundColor:[UIColor blackColor]];
-            [blackBG.view setAlpha:0.5];
-            [wind addSubview:blackBG.view];
+            //blackBG = [[UIViewController alloc] init];
+            blackBG = [[UIView alloc] init];
+            [blackBG setBackgroundColor:[UIColor blackColor]];
+            [blackBG setAlpha:0.5];
+            [wind addSubview:blackBG];
             
             CGRect viewToPresentRect = viewToPresent.frame;
             viewToPresentRect.origin.y = wind.bounds.size.height - viewToPresentRect.size.height;
@@ -351,10 +354,32 @@ UIView* viewToPresentCurrent;
 # define BUTTON_ITEM_STYLE UIBarButtonItemStyleBordered
 #endif
 
-
 - (UIToolbar *)initToolbar:(NSArray*)buttons
 {
-    UIToolbar *pickerDateToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    CGSize screenSize = [UIScreen mainScreen].bounds.size;
+    float screenWidth;
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    switch (orientation) {
+        case UIInterfaceOrientationPortraitUpsideDown: {
+            screenWidth = MIN(screenSize.width, screenSize.height);
+            break;
+        }
+        case UIInterfaceOrientationLandscapeLeft: {
+            screenWidth = MAX(screenSize.width, screenSize.height);
+            break;
+        }
+        case UIInterfaceOrientationLandscapeRight: {
+            screenWidth = MAX(screenSize.width, screenSize.height);
+            break;
+        }
+        default: {
+            screenWidth = MIN(screenSize.width, screenSize.height);
+            break;
+        }
+    }
+    
+    UIToolbar *pickerDateToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 44)];
     pickerDateToolbar.barStyle = UIBarStyleBlackOpaque;
     
     NSMutableArray* barItems = [[NSMutableArray alloc]init];
@@ -430,7 +455,7 @@ UIView* viewToPresentCurrent;
             [actionSheet autorelease];
             actionSheet = nil;
         }else{
-            [blackBG.view removeFromSuperview ];
+            [blackBG removeFromSuperview ];
             [toolbar removeFromSuperview];
             [viewToPresentCurrent removeFromSuperview];
             [blackBG autorelease];
@@ -550,6 +575,7 @@ UIPickerView *pickerList;
 
 -(void)setSelectedRow:(NSInteger)index andSection:(NSInteger)section{
     dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"56492123");
         [pickerList selectRow:index inComponent:section animated:YES];
     });
 }
@@ -583,7 +609,7 @@ UIPickerView *pickerList;
 
 
 #pragma mark - Date Picker
-
+UIDatePicker *datePicker;
 -(void)showDatePickerWithTitle:(NSString *)title
                     andMessage:(NSString *)message
                        andDate:(double *)date
@@ -594,19 +620,20 @@ UIPickerView *pickerList;
                         andMax:(double *)maxDate {
     @try {
         
-        /*
-        if(datePicker!=nil && datePicker.hidden == NO){
+        
+       /* if(datePicker!=nil && datePicker.hidden == NO){
             NSLog(@"[AirDatePicker] HIDDING");
             datePicker.hidden = YES;
             return;
-        }
-         */
+        }*/
+        
 
        //UIView *rootView = [[[[UIApplication sharedApplication] keyWindow] rootViewController] view];
 //--------------------------------------------------------------------------------------------------------------------
-        //[self dismissWithButtonIndex:0];
+        [self dismissWithButtonIndex:0];
         
-        UIDatePicker *datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
+        //UIDatePicker *datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
+        datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0.0, 44.0, 0, 0)];
         [datePicker setDate:[NSDate dateWithTimeIntervalSince1970:*date]];
         datePicker.hidden = NO;
         
@@ -917,7 +944,7 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
                 textInputs: (FREObject*)textInputs
                    buttons: (FREObject*)buttons
 {
-    //[self dismissWithButtonIndex:0];
+    [self dismissWithButtonIndex:0];
     
     NSString* closeLabel=nil;
     
@@ -1287,19 +1314,38 @@ UITextAutocorrectionType getAutocapitalizationTypeFormChar(const char* type){
 
 #pragma mark - All
 
-
 -(void)setCancelable:(uint32_t)can{
     cancelable = can;
 }
 -(void)dismissWithButtonIndex:(int32_t)index{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [popover dismissPopoverAnimated:YES];
-        [actionSheet dismissWithClickedButtonIndex:index animated:YES];
-        [alert dismissWithClickedButtonIndex:index animated:YES];
-        [tsalertView dismissWithClickedButtonIndex:index animated:YES];
-        [sbAlert.view dismissWithClickedButtonIndex:index animated:YES];
-    });
+    
+    @try {
+        
+        BOOL isIOS_8 = [[[UIDevice currentDevice] systemVersion] floatValue]>=8.0;
+        if( isIOS_8 ) {
+            [popover dismissPopoverAnimated:NO];
+            [actionSheet dismissWithClickedButtonIndex:index animated:NO];
+            [alert dismissWithClickedButtonIndex:index animated:NO];
+            [tsalertView dismissWithClickedButtonIndex:index animated:NO];
+            [sbAlert.view dismissWithClickedButtonIndex:index animated:NO];
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [popover dismissPopoverAnimated:YES];
+                [actionSheet dismissWithClickedButtonIndex:index animated:YES];
+                [alert dismissWithClickedButtonIndex:index animated:YES];
+                [tsalertView dismissWithClickedButtonIndex:index animated:YES];
+                [sbAlert.view dismissWithClickedButtonIndex:index animated:YES];
+            });
+        }
+        
+        
+    }
+    @catch (NSException *exception) {
+        FREDispatchStatusEventAsync(freContext, error, (const uint8_t *)[[exception reason] UTF8String]);
+    }
+
 }
+
 -(UIView*)getView{
     NSLog(@"Getting View");
     UIView *u = nil;

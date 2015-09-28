@@ -55,8 +55,27 @@
 	float screenWidth, screenHeight;
 	CGSize screenSize = [UIScreen mainScreen].bounds.size;
 	
+	
+	
+	
+	
+	
+	
+	UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
+	UIInterfaceOrientation statusBarOrientation =[UIApplication sharedApplication].statusBarOrientation;
+
+	
+	
+	
+	
+	
+	
 	UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    switch (orientation) { 
+    
+	
+	
+	
+	switch (orientation) { 
         case UIInterfaceOrientationPortraitUpsideDown: {
 			screenWidth = MIN(screenSize.width, screenSize.height);
 			screenHeight = MAX(screenSize.width, screenSize.height);
@@ -182,38 +201,41 @@
 	CGSize screenSize = [UIScreen mainScreen].bounds.size;
 	float x, y;
 	float screenWidth, screenHeight;
+	
+	x = floor((screenWidth - self.bounds.size.width) / 2.0f);
+	y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
 
     switch (orientation) { 
         case UIInterfaceOrientationPortraitUpsideDown: {
-            angle = M_PI;
+           // angle = 0.0;//M_PI;
 			screenWidth = MIN(screenSize.width, screenSize.height);
 			screenHeight = MAX(screenSize.width, screenSize.height);
-			x = floor((screenWidth - self.bounds.size.width) / 2.0f);
-			y = 15.0f + TABBAR_OFFSET;
+			//x = floor((screenWidth - self.bounds.size.width) / 2.0f);
+			//y = 15.0f + TABBAR_OFFSET;
             break;
 		}
         case UIInterfaceOrientationLandscapeLeft: {
-            angle = - M_PI / 2.0f;
+            //angle = 0.0;//   - M_PI / 2.0f;
 			screenWidth = MAX(screenSize.width, screenSize.height);
 			screenHeight = MIN(screenSize.width, screenSize.height);
-			x = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
-			y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+			//x = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
+			//y = floor((screenWidth - self.bounds.size.width) / 2.0f);
             break;
 		}
         case UIInterfaceOrientationLandscapeRight: {
-            angle = M_PI / 2.0f;
+            //angle = 0.0;//   M_PI / 2.0f;
 			screenWidth = MAX(screenSize.width, screenSize.height);
 			screenHeight = MIN(screenSize.width, screenSize.height);
-			x = 15.0f + TABBAR_OFFSET;
-			y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+			//x = 15.0f + TABBAR_OFFSET;
+			//y = floor((screenWidth - self.bounds.size.width) / 2.0f);
             break;
 		}
         default: {
-            angle = 0.0;
+            //angle = 0.0;
 			screenWidth = MIN(screenSize.width, screenSize.height);
 			screenHeight = MAX(screenSize.width, screenSize.height);
-			x = floor((screenWidth - self.bounds.size.width) / 2.0f);
-			y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
+			//x = floor((screenWidth - self.bounds.size.width) / 2.0f);
+			//y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
             break;
 		}
     }
