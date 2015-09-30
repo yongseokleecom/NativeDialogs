@@ -201,41 +201,51 @@
 	CGSize screenSize = [UIScreen mainScreen].bounds.size;
 	float x, y;
 	float screenWidth, screenHeight;
+    
+    BOOL iOS_7andDown = [[[UIDevice currentDevice] systemVersion] floatValue]<7.0;
+    
 	
 	x = floor((screenWidth - self.bounds.size.width) / 2.0f);
 	y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
 
     switch (orientation) { 
         case UIInterfaceOrientationPortraitUpsideDown: {
-           // angle = 0.0;//M_PI;
 			screenWidth = MIN(screenSize.width, screenSize.height);
 			screenHeight = MAX(screenSize.width, screenSize.height);
-			//x = floor((screenWidth - self.bounds.size.width) / 2.0f);
-			//y = 15.0f + TABBAR_OFFSET;
+            if (iOS_7andDown) {
+                angle = M_PI;
+                x = floor((screenWidth - self.bounds.size.width) / 2.0f);
+                y = 15.0f + TABBAR_OFFSET;
+            }
             break;
 		}
         case UIInterfaceOrientationLandscapeLeft: {
-            //angle = 0.0;//   - M_PI / 2.0f;
 			screenWidth = MAX(screenSize.width, screenSize.height);
 			screenHeight = MIN(screenSize.width, screenSize.height);
-			//x = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
-			//y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+            if (iOS_7andDown) {
+                angle = - M_PI / 2.0f;
+                x = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
+                y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+            }
             break;
 		}
         case UIInterfaceOrientationLandscapeRight: {
-            //angle = 0.0;//   M_PI / 2.0f;
 			screenWidth = MAX(screenSize.width, screenSize.height);
 			screenHeight = MIN(screenSize.width, screenSize.height);
-			//x = 15.0f + TABBAR_OFFSET;
-			//y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+            if (iOS_7andDown) {
+                angle = M_PI / 2.0f;
+                x = 15.0f + TABBAR_OFFSET;
+                y = floor((screenWidth - self.bounds.size.width) / 2.0f);
+            }
             break;
 		}
         default: {
-            //angle = 0.0;
+            NSLog(@"Deault");
+            angle = 0.0;
 			screenWidth = MIN(screenSize.width, screenSize.height);
 			screenHeight = MAX(screenSize.width, screenSize.height);
-			//x = floor((screenWidth - self.bounds.size.width) / 2.0f);
-			//y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
+			x = floor((screenWidth - self.bounds.size.width) / 2.0f);
+			y = screenHeight - self.bounds.size.height - 15.0f - TABBAR_OFFSET;
             break;
 		}
     }
