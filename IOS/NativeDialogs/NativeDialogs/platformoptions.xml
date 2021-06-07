@@ -1,4 +1,4 @@
-<platform xmlns="http://ns.adobe.com/air/extension/16.0">
+<platform xmlns="http://ns.adobe.com/air/extension/33.1">
     <description >NativeDialogs</description> 
     <sdkVersion>6.0</sdkVersion>
     <copyright>2012</copyright> 

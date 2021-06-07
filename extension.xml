@@ -1,8 +1,15 @@
-<extension xmlns="http://ns.adobe.com/air/extension/3.8">
+<extension xmlns="http://ns.adobe.com/air/extension/33.1">
 <id>pl.mateuszmackowiak.nativeANE.NativeDialogs</id>
 <versionNumber>1</versionNumber>
 <platforms>
 <platform name="Android-ARM">
+<applicationDeployment>
+<nativeLibrary>libNativeDialogs.jar</nativeLibrary>
+<initializer>pl.mateuszmackowiak.nativeANE.NativeDialogsExtension</initializer>
+<finalizer>pl.mateuszmackowiak.nativeANE.NativeDialogsExtension</finalizer>
+</applicationDeployment>
+</platform>
+<platform name="Android-ARM64">
 <applicationDeployment>
 <nativeLibrary>libNativeDialogs.jar</nativeLibrary>
 <initializer>pl.mateuszmackowiak.nativeANE.NativeDialogsExtension</initializer>
