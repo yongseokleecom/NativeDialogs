@@ -38,7 +38,9 @@
 	<!-- Copy iOS lib in binaries folder -->
 	<target name="iOSCopy" if="${IOS_ARM_ENABLE}" depends="iOSCompile">
 		<copy todir="${BINARIES_FOLDER}/iOS">
-			<fileset dir="${IOS_GENERATED_PATH}"/>
+			<fileset dir="${IOS_GENERATED_PATH}">
+				<exclude name="NativeDialogs.build/**"/>
+			</fileset>
 		</copy>
 		<!--<copy file="${IOS_LIB_PATH}" todir="${BINARIES_FOLDER}/iOS"/>-->
 	</target>
